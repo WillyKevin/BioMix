@@ -617,7 +617,7 @@ with col_main:
 
             # Display the chosen image
             if img_display_orig is not None:
-                st.image(img_display_orig, caption=f"{caption_orig} {placa_detectada_info}", use_column_width='always')
+                st.image(img_display_orig, caption=f"{caption_orig} {placa_detectada_info}", use_container_width=True)
             else:
                 st.warning("Imagem original não disponível para exibição.")
         else:
@@ -685,7 +685,7 @@ with col_main:
                         img_resultado_rgb = cv2.cvtColor(res_atual['imagem'], cv2.COLOR_BGR2RGB)
                         st.image(img_resultado_rgb,
                                  caption=f"Resultado ({res_atual.get('method', 'N/A')}): {res_atual.get('contagem', 0)} colônias",
-                                 use_column_width='always')
+                                 use_container_width=True)
                     except Exception as e_res:
                         st.warning(f"Não foi possível exibir a imagem de resultado: {e_res}")
                         st.write("Detalhes do Resultado:")
@@ -756,7 +756,7 @@ with col_main:
                         try:
                             if isinstance(debug_item, np.ndarray): # It's an image
                                 # Assume images in debug_data are already RGB or Grayscale suitable for display
-                                st.image(debug_item, caption=caption, use_column_width='always')
+                                st.image(debug_item, caption=caption, use_container_width=True)
                             elif isinstance(debug_item, bool) and key == 'placa_detectada': # Special case for boolean
                                 st.metric("Placa Detectada?", "✔️ Sim" if debug_item else "❌ Não")
                             elif isinstance(debug_item, (int, float, str, bool)): # Display other simple data types
