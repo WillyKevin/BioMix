@@ -5,6 +5,7 @@ pandas
 cv2
 scipy
 scikit-image
+xlsxwriter
 time
 zipfile
 PIL
@@ -13,65 +14,3 @@ io
 
 
 
-def recortar_placa(img_cv):
-    """
-    Tenta detectar a placa de Petri circular na imagem, criar uma máscara
-    e recortar a imagem original para conter apenas a placa com uma pequena margem.
-    Retorna a imagem recortada e True em caso de sucesso,
-    ou a imagem original e False em caso de falha na detecção.
-    """
-    if len(img_cv.shape) == 3 and img_cv.shape[2] == 3:
-        gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
-    elif len(img_cv.shape) == 2:
-        gray = img_cv
-    elif len(img_cv.shape) == 3 and img_cv.shape[2] == 4: # Caso tenha canal alfa
-        gray = cv2.cvtColor(img_cv, cv2.COLOR_BGRA2GRAY)
-    else:
-        return img_cv, False
-
-    try:
-        blur = cv2.medianBlur(gray, 15) # Kernel ímpar
-
-        circles = cv2.HoughCircles(
-            blur, cv2.HOUGH_GRADIENT, dp=1.2, minDist=gray.shape[0]//4,
-            param1=80, param2=55,
-            minRadius=max(100, gray.shape[0]//6),
-            maxRadius=gray.shape[0]//2
-        )
-
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
-            circles = sorted(circles, key=lambda x: x[2], reverse=True)
-            (x, y, r) = circles[0]
-
-            mask = np.zeros_like(gray)
-            cv2.circle(mask, (x, y), r, 255, -1)
-
-            if len(img_cv.shape) == 3:
-                if img_cv.shape[2] == 4:
-                    img_cv_for_mask = cv2.cvtColor(img_cv, cv2.COLOR_BGRA2BGR)
-                else:
-                    img_cv_for_mask = img_cv
-                img_masked = cv2.bitwise_and(img_cv_for_mask, img_cv_for_mask, mask=mask)
-            elif len(img_cv.shape) == 2:
-                img_masked = cv2.bitwise_and(img_cv, img_cv, mask=mask)
-            else:
-                return img_cv, False
-
-            margin = int(r * 0.05)
-            y_start = max(0, y - r - margin)
-            y_end = min(img_masked.shape[0], y + r + margin)
-            x_start = max(0, x - r - margin)
-            x_end = min(img_masked.shape[1], x + r + margin)
-
-            img_cortada = img_masked[y_start:y_end, x_start:x_end]
-
-            if img_cortada.size == 0:
-                return img_cv, False
-
-            return img_cortada, True
-        else:
-            return img_cv, False
-    except Exception as e:
-        # Em produção, pode ser útil logar o erro: print(f"Erro em recortar_placa: {e}")
-        return img_cv, False
