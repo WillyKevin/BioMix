@@ -2,15 +2,10 @@ streamlit
 opencv-python
 numpy
 pandas
-opencv-python
 scipy
 scikit-image
+Pillow
 xlsxwriter
-time
-zipfile
-PIL
-os
-io
 
 
 
